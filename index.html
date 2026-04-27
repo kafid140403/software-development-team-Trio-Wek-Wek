@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Chatbot RS</title>
+
+<style>
+body {
+  font-family: Arial;
+  background: #e5ddd5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+/* CONTAINER */
+.chat {
+  width: 350px;
+  height: 550px;
+  background: #ece5dd;
+  display: flex;
+  flex-direction: column;
+}
+
+/* HEADER */
+.header {
+  background: #075e54;
+  color: white;
+  padding: 15px;
+}
+
+/* CHAT BOX */
+.chat-box {
+  flex: 1;
+  padding: 10px;
+  overflow-y: auto;
+}
+
+/* MESSAGE */
+.msg {
+  padding: 8px;
+  margin: 5px;
+  border-radius: 10px;
+  max-width: 70%;
+}
+
+.bot {
+  background: white;
+}
+
+.user {
+  background: #dcf8c6;
+  margin-left: auto;
+}
+
+/* MENU BUTTON */
+.menu {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 5px;
+}
+
+.menu button {
+  margin: 5px;
+  padding: 8px;
+  border: none;
+  border-radius: 8px;
+  background: #075e54;
+  color: white;
+  cursor: pointer;
+}
+
+/* INPUT */
+.input {
+  display: flex;
+  padding: 10px;
+}
+
+.input input {
+  flex: 1;
+  padding: 10px;
+}
+
+.input button {
+  padding: 10px;
+  background: #075e54;
+  color: white;
+  border: none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="chat">
+
+  <div class="header">🏥 Chatbot RS</div>
+
+  <div class="chat-box" id="chatBox"></div>
+
+  <div class="menu" id="menu"></div>
+
+  <div class="input">
+    <input id="input" placeholder="Ketik pesan...">
+    <button onclick="sendText()">Kirim</button>
+  </div>
+
+</div>
+
+<script>
+const API = "/webhook";
+
+function addMsg(text, type){
+  const box = document.getElementById("chatBox");
+  const div = document.createElement("div");
+  div.className = "msg " + type;
+  div.innerText = text;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+function showMenu(){
+  const menu = document.getElementById("menu");
+
+  const items = [
+    "1 Cek Gejala",
+    "2 Konsultasi",
+    "3 Jadwal Dokter",
+    "4 Info Obat",
+    "5 Tips Sehat",
+    "6 Riwayat",
+    "7 Lokasi",
+    "8 Admin",
+    "9 Bantuan"
+  ];
+
+  menu.innerHTML = "";
+
+  items.forEach(item => {
+    const num = item.split(" ")[0];
+
+    const btn = document.createElement("button");
+    btn.innerText = item;
+    btn.onclick = () => sendMenu(num);
+
+    menu.appendChild(btn);
+  });
+}
+
+async function sendMenu(num){
+  addMsg(num, "user");
+
+  const res = await fetch(API, {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({
+      token: "web",
+      chat: "user1",
+      msg: { rawText: num }
+    })
+  });
+
+  addMsg("✔ menu dikirim ke server", "bot");
+}
+
+async function sendText(){
+  const input = document.getElementById("input");
+  const text = input.value;
+
+  if(!text) return;
+
+  addMsg(text, "user");
+  input.value = "";
+
+  await fetch(API, {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({
+      token: "web",
+      chat: "user1",
+      msg: { rawText: text }
+    })
+  });
+
+  addMsg("✔ terkirim", "bot");
+}
+
+// load awal
+addMsg("Halo 👋 pilih menu:", "bot");
+showMenu();
+</script>
+
+</body>
+</html>
