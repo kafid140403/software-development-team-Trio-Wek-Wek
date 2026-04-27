@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard Chatbot RS</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+  display: flex;
+  height: 100vh;
+}
+
+/* SIDEBAR */
+.sidebar {
+  width: 220px;
+  background: #075e54;
+  color: white;
+  padding: 20px;
+}
+
+.sidebar h2 {
+  margin-bottom: 20px;
+}
+
+.sidebar div {
+  margin: 10px 0;
+  cursor: pointer;
+}
+
+/* MAIN */
+.main {
+  flex: 1;
+  display: flex;
+}
+
+/* USER LIST */
+.users {
+  width: 250px;
+  border-right: 1px solid #ccc;
+  overflow-y: auto;
+}
+
+.user {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+}
+
+.user:hover {
+  background: #f5f5f5;
+}
+
+/* CHAT */
+.chat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-box {
+  flex: 1;
+  padding: 10px;
+  overflow-y: auto;
+  background: #ece5dd;
+}
+
+.message {
+  max-width: 70%;
+  padding: 8px;
+  margin: 5px 0;
+  border-radius: 10px;
+}
+
+.admin {
+  background: #dcf8c6;
+  margin-left: auto;
+}
+
+.user-msg {
+  background: white;
+  margin-right: auto;
+}
+
+.chat-input {
+  display: flex;
+  padding: 10px;
+}
+
+.chat-input input {
+  flex: 1;
+  padding: 10px;
+}
+
+.chat-input button {
+  padding: 10px;
+  background: #075e54;
+  color: white;
+  border: none;
+}
+
+/* STAT */
+.stat {
+  padding: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+  <h2>Admin RS</h2>
+  <div onclick="showPage('dashboard')">Dashboard</div>
+  <div onclick="showPage('chat')">Chat</div>
+  <div onclick="showPage('stat')">Statistik</div>
+</div>
+
+<div class="main">
+
+  <!-- USER LIST -->
+  <div class="users" id="userList"></div>
+
+  <!-- CHAT -->
+  <div class="chat">
+    <div class="chat-box" id="chatBox"></div>
+
+    <div class="chat-input">
+      <input type="text" id="msgInput" placeholder="Ketik pesan...">
+      <button onclick="sendMessage()">Kirim</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const API = "http://localhost:3335/webhook";
+
+let selectedUser = null;
+
+// DATA DUMMY USER
+let users = ["user1", "user2", "user3"];
+
+function loadUsers(){
+  let list = document.getElementById("userList");
+  list.innerHTML = "";
+
+  users.forEach(u => {
+    let div = document.createElement("div");
+    div.className = "user";
+    div.innerText = u;
+    div.onclick = () => selectUser(u);
+    list.appendChild(div);
+  });
+}
+
+function selectUser(user){
+  selectedUser = user;
+  document.getElementById("chatBox").innerHTML = "";
+}
+
+function addMessage(text, type){
+  let box = document.getElementById("chatBox");
+  let msg = document.createElement("div");
+  msg.className = "message " + type;
+  msg.innerText = text;
+  box.appendChild(msg);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function sendMessage(){
+  let input = document.getElementById("msgInput");
+  let text = input.value.trim();
+
+  if(!text || !selectedUser){
+    alert("Pilih user dulu!");
+    return;
+  }
+
+  addMessage(text, "admin");
+  input.value = "";
+
+  try{
+    await fetch(API, {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({
+        token: "admin-token",
+        chat: selectedUser,
+        msg: { rawText: text }
+      })
+    });
+  }catch(err){
+    addMessage("❌ Error kirim", "admin");
+  }
+}
+
+function showPage(page){
+  alert("Halaman: " + page);
+}
+
+loadUsers();
+</script>
+
+</body>
+</html>
