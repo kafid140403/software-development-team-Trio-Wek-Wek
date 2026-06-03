@@ -85,6 +85,77 @@ app.post("/webhook", async (req, res) => {
   const body = req.body;
   const text = (body.msg?.rawText || "").trim().toLowerCase();
 
+  const nomorWa = body.sender?.pn
+    ? body.sender.pn.split("@")[0]
+    : null;
+    let currentUser = null;
+
+if (nomorWa) {
+
+  db.query(
+    "SELECT * FROM users WHERE no_whatsapp = ?",
+    [nomorWa],
+    async (err, users) => {
+
+      if (err) {
+        console.log(err);
+        return;
+      }
+
+      if (users.length > 0) {
+        currentUser = users[0];
+      }
+    }
+  );
+}
+
+  const namaUser =
+    body.sender?.pushName && body.sender.pushName !== "."
+      ? body.sender.pushName
+      : "User WhatsApp";
+
+  // AUTO REGISTER USER
+  if (nomorWa) {
+    db.query(
+      "SELECT id FROM users WHERE no_whatsapp = ?",
+      [nomorWa],
+      (err, users) => {
+
+        if (err) {
+          console.log(err);
+          return;
+        }
+
+        if (users.length === 0) {
+
+        db.query(
+  `INSERT INTO users
+   (nama, no_whatsapp, alamat, tanggal_lahir, jenis_kelamin)
+   VALUES (?, ?, ?, ?, ?)`,
+  [
+    "",
+    nomorWa,
+    "",
+    null,
+    null
+  ],
+            (err) => {
+
+              if (err) {
+                console.log("Gagal auto register user:", err);
+              } else {
+                console.log("User baru berhasil dibuat:", nomorWa);
+              }
+
+            }
+          );
+
+        }
+
+      }
+    );
+  }
+
   /*
   ====================================
   TEST PING
@@ -100,11 +171,182 @@ app.post("/webhook", async (req, res) => {
     return res.end();
   }
 
+/*
+====================================
+REGISTRASI IDENTITAS
+====================================
+*/
+
+if (
+  text.startsWith("nama:") &&
+  text.includes("tanggal lahir:") &&
+  text.includes("jenis kelamin:") &&
+  text.includes("alamat:")
+) {
+
+  const nama =
+    text.match(/nama:\s*(.*)/i)?.[1]
+      ?.split("tanggal lahir:")[0]
+      ?.trim();
+
+  const tanggalLahir =
+    text.match(/tanggal lahir:\s*(.*)/i)?.[1]
+      ?.split("jenis kelamin:")[0]
+      ?.trim();
+
+  const jenisKelamin =
+    text.match(/jenis kelamin:\s*(.*)/i)?.[1]
+      ?.split("alamat:")[0]
+      ?.trim();
+
+  const alamat =
+    text.match(/alamat:\s*(.*)/i)?.[1]
+      ?.trim();
+
+  db.query(
+    `UPDATE users
+     SET nama=?,
+         tanggal_lahir=?,
+         jenis_kelamin=?,
+         alamat=?
+     WHERE no_whatsapp=?`,
+    [
+      nama,
+      tanggalLahir,
+      jenisKelamin,
+      alamat,
+      nomorWa
+    ],
+    async (err) => {
+
+      if (err) {
+        console.log(err);
+
+        await sendMessage({
+          token: body.token,
+          to: body.chat,
+          message: "Gagal menyimpan data diri",
+        });
+
+        return res.end();
+      }
+
+      await sendMessage({
+        token: body.token,
+        to: body.chat,
+        message:
+          "✅ Data berhasil disimpan.\n\n" +
+          "Silakan pilih menu:\n\n" +
+          "1️⃣ Cek Gejala Penyakit\n" +
+          "2️⃣ Konsultasi Dokter\n" +
+          "3️⃣ Jadwal Dokter\n" +
+          "4️⃣ Informasi Obat\n" +
+          "5️⃣ Tips Kesehatan\n" +
+          "6️⃣ Riwayat Konsultasi",
+      });
+
+      return res.end();
+    }
+  );
+
+  return;
+}
+db.query(
+  "SELECT * FROM users WHERE no_whatsapp=?",
+  [nomorWa],
+  async (err, users) => {
+
+    if (users.length > 0) {
+
+      const user = users[0];
+
+      if (user.state === "menunggu_keluhan") {
+
+        db.query(
+          `INSERT INTO konsultasi
+          (user_id, keluhan, status)
+          VALUES (?, ?, ?)`,
+          [
+            user.id,
+            body.msg.rawText,
+            "Proses"
+          ],
+          async (err) => {
+
+            if (err) {
+              console.log(err);
+              return res.end();
+            }
+
+            db.query(
+              "UPDATE users SET state=NULL WHERE id=?",
+              [user.id]
+            );
+
+            await sendMessage({
+              token: body.token,
+              to: body.chat,
+              message:
+                "✅ Keluhan berhasil dikirim.\n\n" +
+                "Dokter akan segera meninjau konsultasi Anda."
+            });
+
+            return res.end();
+          }
+        );
+
+        return;
+      }
+
+    }
+
+  }
+);
   /*
   ====================================
   MENU 1 - FAQ / GEJALA
   ====================================
   */
+ db.query(
+  "SELECT * FROM users WHERE no_whatsapp = ?",
+  [nomorWa],
+  async (err, users) => {
+
+    if (err) {
+      console.log(err);
+      return;
+    }
+
+    if (
+      users.length > 0 &&
+      (
+        !users[0].nama ||
+        users[0].nama === ""
+      )
+    ) {
+
+      await sendMessage({
+        token: body.token,
+        to: body.chat,
+        message:
+          "📝 Data diri Anda belum lengkap.\n\n" +
+          "Silakan kirim:\n\n" +
+          "Nama:\n" +
+          "Tanggal Lahir:\n" +
+          "Jenis Kelamin:\n" +
+          "Alamat:\n\n" +
+          "Contoh:\n\n" +
+          "Nama: Mochamad kafid syaifudin\n" +
+          "Tanggal Lahir: 2000-01-15\n" +
+          "Jenis Kelamin: Laki-laki\n" +
+          "Alamat: Malang"
+      });
+
+      return res.end();
+    }
+
+  }
+);
   if (text === "1") {
 
     const sql = `SELECT * FROM faq`;
@@ -147,42 +389,26 @@ app.post("/webhook", async (req, res) => {
   MENU 2 - KONSULTASI
   ====================================
   */
+
   if (text === "2") {
 
-    const sql = `
-      INSERT INTO konsultasi 
-      (user_id, keluhan)
-      VALUES (?, ?)
-    `;
+  db.query(
+    "UPDATE users SET state='menunggu_keluhan' WHERE no_whatsapp=?",
+    [nomorWa]
+  );
 
-    db.query(sql, [body.chat, "User meminta konsultasi"], async (err, result) => {
+  await sendMessage({
+    token: body.token,
+    to: body.chat,
+    message:
+      "👨‍⚕️ *Konsultasi Dokter*\n\n" +
+      "Silakan tuliskan keluhan yang Anda alami.\n\n" +
+      "Contoh:\n" +
+      "Saya mengalami demam sejak 3 hari dan sakit tenggorokan."
+  });
 
-      if (err) {
-        console.log(err);
-
-        await sendMessage({
-          token: body.token,
-          to: body.chat,
-          message: "Gagal menyimpan konsultasi",
-        });
-
-        return res.end();
-      }
-
-      await sendMessage({
-        token: body.token,
-        to: body.chat,
-        message:
-          "👨‍⚕️ *Konsultasi Dokter*\n\n" +
-          "Konsultasi berhasil dibuat.\n" +
-          "Silakan tunggu dokter merespon.",
-      });
-
-      return res.end();
-    });
-
-    return;
-  }
+  return res.end();
+}
 
   /*
   ====================================
@@ -323,67 +549,96 @@ app.post("/webhook", async (req, res) => {
     return;
   }
 
-  /*
-  ====================================
-  MENU 6 - RIWAYAT KONSULTASI
-  ====================================
-  */
-  if (text === "6") {
+ /*
+====================================
+MENU 6 - RIWAYAT KONSULTASI
+====================================
+*/
+if (text === "6") {
 
-    const sql = `
-      SELECT * FROM konsultasi
-      WHERE user_id = ?
-      ORDER BY id DESC
-      LIMIT 5
-    `;
-
-    db.query(sql, [body.chat], async (err, results) => {
+  db.query(
+    "SELECT id FROM users WHERE no_whatsapp = ?",
+    [nomorWa],
+    async (err, users) => {
 
       if (err) {
         console.log(err);
+        return res.end();
+      }
+
+      if (users.length === 0) {
 
         await sendMessage({
           token: body.token,
           to: body.chat,
-          message: "Gagal mengambil riwayat konsultasi",
+          message: "Data pengguna tidak ditemukan",
         });
 
         return res.end();
       }
 
-      if (results.length === 0) {
-        await sendMessage({
-          token: body.token,
-          to: body.chat,
-          message: "Belum ada riwayat konsultasi",
-        });
+      const userId = users[0].id;
 
-        return res.end();
-      }
+      const sql = `
+        SELECT *
+        FROM konsultasi
+        WHERE user_id = ?
+        ORDER BY id DESC
+        LIMIT 5
+      `;
 
-      let pesan = "📄 *Riwayat Konsultasi*\n\n";
+      db.query(sql, [userId], async (err, results) => {
 
-      results.forEach((item, index) => {
-        pesan += `${index + 1}. ${item.keluhan}\n`;
+        if (err) {
+          console.log(err);
 
-        if (item.hasil_diagnosa) {
-          pesan += `Diagnosa: ${item.hasil_diagnosa}\n`;
+          await sendMessage({
+            token: body.token,
+            to: body.chat,
+            message: "Gagal mengambil riwayat konsultasi",
+          });
+
+          return res.end();
         }
 
-        pesan += `\n`;
+        if (results.length === 0) {
+
+          await sendMessage({
+            token: body.token,
+            to: body.chat,
+            message: "Belum ada riwayat konsultasi",
+          });
+
+          return res.end();
+        }
+
+        let pesan = "📄 *Riwayat Konsultasi*\n\n";
+
+        results.forEach((item, index) => {
+
+          pesan += `${index + 1}. ${item.keluhan}\n`;
+          pesan += `Status: ${item.status}\n`;
+
+          if (item.hasil_diagnosa) {
+            pesan += `Diagnosa: ${item.hasil_diagnosa}\n`;
+          }
+
+          pesan += "\n";
+        });
+
+        await sendMessage({
+          token: body.token,
+          to: body.chat,
+          message: pesan,
+        });
+
+        return res.end();
       });
+    }
+  );
 
-      await sendMessage({
-        token: body.token,
-        to: body.chat,
-        message: pesan,
-      });
-
-      return res.end();
-    });
-
-    return;
-  }
+  return;
+}
 
   /*
   ====================================
