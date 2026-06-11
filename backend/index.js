@@ -1,6 +1,9 @@
 const express = require("express");
+<<<<<<< HEAD
 const mysql = require("mysql2");
 
+=======
+>>>>>>> 8aa78e65cd784b1d5c84e5035da0bf9d519c2868
 const app = express();
 
 app.use(express.json({ limit: "50mb" }));
@@ -10,6 +13,7 @@ const port = 3335;
 
 /*
 ====================================
+<<<<<<< HEAD
 KONEKSI DATABASE
 ====================================
 */
@@ -31,6 +35,9 @@ db.connect((err) => {
 /*
 ====================================
 KIRIM PESAN
+=======
+KIRIM PESAN TEXT
+>>>>>>> 8aa78e65cd784b1d5c84e5035da0bf9d519c2868
 ====================================
 */
 async function sendMessage(data) {
@@ -61,6 +68,7 @@ async function sendMainMenu(body) {
     to: body.chat,
     message:
       "🏥 *Chatbot Konsultasi Layanan Kesehatan*\n\n" +
+<<<<<<< HEAD
       "Selamat datang 👋\n\n" +
       "1️⃣ Cek Gejala Penyakit\n" +
       "2️⃣ Konsultasi dengan Dokter\n" +
@@ -72,6 +80,20 @@ async function sendMainMenu(body) {
       "8️⃣ Hubungi Admin\n" +
       "9️⃣ Bantuan\n\n" +
       "Balas dengan angka menu.\n" +
+=======
+      "Selamat datang 👋\n" +
+      "Silakan pilih layanan berikut:\n\n" +
+      "1️⃣ Cek Gejala Penyakit\n" +
+      "2️⃣ Konsultasi dengan Dokter\n" +
+      "3️⃣ Jadwal Dokter\n" +
+      "4️⃣ Informasi Obat Dasar\n" +
+      "5️⃣ Tips Kesehatan Harian\n" +
+      "6️⃣ Riwayat Konsultasi\n" +
+      "7️⃣ Lokasi Klinik / Rumah Sakit\n" +
+      "8️⃣ Hubungi Admin\n" +
+      "9️⃣ Bantuan\n\n" +
+      "Silakan balas dengan angka pilihan Anda.\n" +
+>>>>>>> 8aa78e65cd784b1d5c84e5035da0bf9d519c2868
       "Contoh: 1",
   });
 }
@@ -85,6 +107,7 @@ app.post("/webhook", async (req, res) => {
   const body = req.body;
   const text = (body.msg?.rawText || "").trim().toLowerCase();
 
+<<<<<<< HEAD
   const nomorWa = body.sender?.pn
     ? body.sender.pn.split("@")[0]
     : null;
@@ -156,6 +179,8 @@ if (nomorWa) {
     );
   }
 
+=======
+>>>>>>> 8aa78e65cd784b1d5c84e5035da0bf9d519c2868
   /*
   ====================================
   TEST PING
@@ -171,6 +196,7 @@ if (nomorWa) {
     return res.end();
   }
 
+<<<<<<< HEAD
 /*
 ====================================
 REGISTRASI IDENTITAS
@@ -382,10 +408,34 @@ db.query(
     });
 
     return;
+=======
+  /*
+  ====================================
+  MENU 1 - CEK GEJALA
+  ====================================
+  */
+  if (text === "1") {
+    await sendMessage({
+      token: body.token,
+      to: body.chat,
+      message:
+        "🔍 *Cek Gejala Penyakit*\n\n" +
+        "Silakan pilih keluhan yang Anda rasakan:\n\n" +
+        "• Demam\n" +
+        "• Batuk & Flu\n" +
+        "• Sakit Kepala\n" +
+        "• Nyeri Lambung\n" +
+        "• Sesak Napas\n\n" +
+        "Silakan jelaskan gejala Anda.",
+    });
+
+    return res.end();
+>>>>>>> 8aa78e65cd784b1d5c84e5035da0bf9d519c2868
   }
 
   /*
   ====================================
+<<<<<<< HEAD
   MENU 2 - KONSULTASI
   ====================================
   */
@@ -409,6 +459,23 @@ db.query(
 
   return res.end();
 }
+=======
+  MENU 2 - KONSULTASI DOKTER
+  ====================================
+  */
+  if (text === "2") {
+    await sendMessage({
+      token: body.token,
+      to: body.chat,
+      message:
+        "👨‍⚕️ *Konsultasi dengan Dokter*\n\n" +
+        "Silakan kirim keluhan Anda secara singkat.\n" +
+        "Dokter akan segera merespon.",
+    });
+
+    return res.end();
+  }
+>>>>>>> 8aa78e65cd784b1d5c84e5035da0bf9d519c2868
 
   /*
   ====================================
@@ -416,6 +483,7 @@ db.query(
   ====================================
   */
   if (text === "3") {
+<<<<<<< HEAD
 
     const sql = `
       SELECT 
@@ -464,6 +532,19 @@ db.query(
     });
 
     return;
+=======
+    await sendMessage({
+      token: body.token,
+      to: body.chat,
+      message:
+        "📅 *Jadwal Dokter*\n\n" +
+        "1. Dokter Umum : Senin - Jumat (08:00 - 15:00)\n" +
+        "2. Dokter Anak : Senin - Kamis (09:00 - 14:00)\n" +
+        "3. Dokter Gigi : Selasa - Sabtu (10:00 - 16:00)",
+    });
+
+    return res.end();
+>>>>>>> 8aa78e65cd784b1d5c84e5035da0bf9d519c2868
   }
 
   /*
@@ -472,6 +553,7 @@ db.query(
   ====================================
   */
   if (text === "4") {
+<<<<<<< HEAD
 
     const sql = `SELECT * FROM obat`;
 
@@ -506,6 +588,20 @@ db.query(
     });
 
     return;
+=======
+    await sendMessage({
+      token: body.token,
+      to: body.chat,
+      message:
+        "💊 *Informasi Obat Dasar*\n\n" +
+        "1. Paracetamol → untuk demam\n" +
+        "2. OBH → untuk batuk\n" +
+        "3. Antasida → untuk maag\n" +
+        "4. Vitamin C → menjaga daya tahan tubuh",
+    });
+
+    return res.end();
+>>>>>>> 8aa78e65cd784b1d5c84e5035da0bf9d519c2868
   }
 
   /*
@@ -514,6 +610,7 @@ db.query(
   ====================================
   */
   if (text === "5") {
+<<<<<<< HEAD
 
     const sql = `SELECT * FROM faq LIMIT 5`;
 
@@ -647,13 +744,23 @@ if (text === "6") {
   */
   if (text === "7") {
 
+=======
+>>>>>>> 8aa78e65cd784b1d5c84e5035da0bf9d519c2868
     await sendMessage({
       token: body.token,
       to: body.chat,
       message:
+<<<<<<< HEAD
         "📍 *Lokasi Klinik / Rumah Sakit*\n\n" +
         "RSUD Daha Husada\n" +
         "Jl. Ahmad Yani No.123",
+=======
+        "🌿 *Tips Kesehatan Harian*\n\n" +
+        "• Minum air putih 8 gelas per hari\n" +
+        "• Tidur cukup 7-8 jam\n" +
+        "• Olahraga rutin\n" +
+        "• Konsumsi makanan bergizi",
+>>>>>>> 8aa78e65cd784b1d5c84e5035da0bf9d519c2868
     });
 
     return res.end();
@@ -661,6 +768,7 @@ if (text === "6") {
 
   /*
   ====================================
+<<<<<<< HEAD
   MENU 8 - ADMIN
   ====================================
   */
@@ -709,6 +817,57 @@ if (text === "6") {
     });
 
     return;
+=======
+  MENU 6 - RIWAYAT KONSULTASI
+  ====================================
+  */
+  if (text === "6") {
+    await sendMessage({
+      token: body.token,
+      to: body.chat,
+      message:
+        "📄 *Riwayat Konsultasi*\n\n" +
+        "Belum ada riwayat konsultasi sebelumnya.",
+    });
+
+    return res.end();
+  }
+
+  /*
+  ====================================
+  MENU 7 - LOKASI KLINIK / RS
+  ====================================
+  */
+  if (text === "7") {
+    await sendMessage({
+      token: body.token,
+      to: body.chat,
+      message:
+        "📍 *Lokasi Klinik / Rumah Sakit*\n\n" +
+        "RSUD Daha Husada\n" +
+        "Jl. Contoh No.123, Kota Anda",
+    });
+
+    return res.end();
+  }
+
+  /*
+  ====================================
+  MENU 8 - HUBUNGI ADMIN
+  ====================================
+  */
+  if (text === "8") {
+    await sendMessage({
+      token: body.token,
+      to: body.chat,
+      message:
+        "📞 *Hubungi Admin*\n\n" +
+        "Admin Rumah Sakit:\n" +
+        "0812-3456-7890",
+    });
+
+    return res.end();
+>>>>>>> 8aa78e65cd784b1d5c84e5035da0bf9d519c2868
   }
 
   /*
@@ -717,14 +876,24 @@ if (text === "6") {
   ====================================
   */
   if (text === "9") {
+<<<<<<< HEAD
 
+=======
+>>>>>>> 8aa78e65cd784b1d5c84e5035da0bf9d519c2868
     await sendMessage({
       token: body.token,
       to: body.chat,
       message:
+<<<<<<< HEAD
         "❓ *Bantuan*\n\n" +
         "Kirim angka menu untuk menggunakan chatbot.\n\n" +
         "Contoh:\n1\n2\n3",
+=======
+        "❓ *Bantuan Penggunaan Bot*\n\n" +
+        "Cukup kirim pesan apa saja untuk membuka menu utama.\n\n" +
+        "Lalu balas dengan angka pilihan menu.\n" +
+        "Contoh: 1",
+>>>>>>> 8aa78e65cd784b1d5c84e5035da0bf9d519c2868
     });
 
     return res.end();
@@ -732,7 +901,11 @@ if (text === "6") {
 
   /*
   ====================================
+<<<<<<< HEAD
   MENU UTAMA
+=======
+  INPUT APA SAJA → MENU UTAMA
+>>>>>>> 8aa78e65cd784b1d5c84e5035da0bf9d519c2868
   ====================================
   */
   await sendMainMenu(body);
