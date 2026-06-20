@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Jadwal Dokter</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+</head>
+<div class="modal fade" id="jadwalModal">
+
+    <div class="modal-dialog">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5>Tambah Jadwal</h5>
+            </div>
+
+            <div class="modal-body">
+
+                <label>Dokter</label>
+
+                <select
+                    id="dokter_id"
+                    class="form-control mb-2">
+
+                </select>
+
+                <label>Hari</label>
+
+                <select
+                    id="hari"
+                    class="form-control mb-2">
+
+                    <option>Senin</option>
+                    <option>Selasa</option>
+                    <option>Rabu</option>
+                    <option>Kamis</option>
+                    <option>Jumat</option>
+                    <option>Sabtu</option>
+
+                </select>
+
+                <label>Jam Mulai</label>
+
+                <input
+                    type="time"
+                    id="jam_mulai"
+                    class="form-control mb-2">
+
+                <label>Jam Selesai</label>
+
+                <input
+                    type="time"
+                    id="jam_selesai"
+                    class="form-control mb-2">
+
+                <label>Poli</label>
+
+                <input
+                    type="text"
+                    id="poli"
+                    class="form-control">
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button
+                    class="btn btn-success"
+                    onclick="tambahJadwal()">
+
+                    Simpan
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+<div class="modal fade" id="editJadwalModal">
+
+    <div class="modal-dialog">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5>Edit Jadwal</h5>
+            </div>
+
+            <div class="modal-body">
+
+                <input type="hidden" id="edit_id">
+
+                <select
+                    id="edit_dokter_id"
+                    class="form-control mb-2">
+                </select>
+
+                <select
+                    id="edit_hari"
+                    class="form-control mb-2">
+
+                    <option>Senin</option>
+                    <option>Selasa</option>
+                    <option>Rabu</option>
+                    <option>Kamis</option>
+                    <option>Jumat</option>
+                    <option>Sabtu</option>
+
+                </select>
+
+                <input
+                    type="time"
+                    id="edit_jam_mulai"
+                    class="form-control mb-2">
+
+                <input
+                    type="time"
+                    id="edit_jam_selesai"
+                    class="form-control mb-2">
+
+                <input
+                    type="text"
+                    id="edit_poli"
+                    class="form-control">
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button
+                    class="btn btn-success"
+                    onclick="updateJadwal()">
+
+                    Simpan
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+<body>
+
+<div class="container mt-4">
+
+    <h2>Jadwal Dokter</h2>
+
+    <button
+        class="btn btn-primary mb-3"
+        data-bs-toggle="modal"
+        data-bs-target="#jadwalModal">
+
+        Tambah Jadwal
+
+    </button>
+
+    <table class="table table-bordered">
+
+        <thead>
+
+        <tr>
+
+            <th>ID</th>
+            <th>Dokter</th>
+            <th>Hari</th>
+            <th>Jam Mulai</th>
+            <th>Jam Selesai</th>
+            <th>Poli</th>
+            <th>Aksi</th>
+
+        </tr>
+
+        </thead>
+
+        <tbody id="jadwalTable">
+
+        </tbody>
+
+    </table>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="jadwal.js"></script>
+
+</body>
+</html>
